@@ -19,14 +19,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('api')->group(function () {
 
-    // Public routes
     Route::post('/login', [AuthController::class, 'login'])->name('api.login');
 
-    // Protected routes with authentication
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
 
-        // Company-related routes
-        Route::get('get-published-posts', [PostController::class, 'getPublishedData'])->name('api.getPublishedPosts');
-    });
+        Route::get('get-published-posts', [PostController::class, 'getPublishedData']);
+        Route::get('get-draft-posts', [PostController::class, 'getDraftData']);
+        Route::get('get-all-posts', [PostController::class, 'getAllData']);
+        Route::post('create-post', [PostController::class, 'createPost']);
+        Route::put('update-post/{id}', [PostController::class, 'updatePost']);
+        Route::delete('delete-post/{id}', [PostController::class, 'deletePost']);
+        });
 });
