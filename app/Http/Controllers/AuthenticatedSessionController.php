@@ -81,10 +81,10 @@ class AuthenticatedSessionController extends Controller
 
         return app(TwoFactorLoginResponse::class);
     }
-    
+
     public function destroy(Request $request): LogoutResponse
     {
-        Auth::user()->tokens->each(function($token, $key) { 
+        Auth::user()->tokens->each(function($token, $key) {
             $token->delete();
         });
         $this->guard->logout();

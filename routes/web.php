@@ -1,35 +1,38 @@
 <?php
-
+use App\Http\Controllers\admin\DashboardController;
+use App\Http\Controllers\AuthenticatedSessionController;
+use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('change-lang/{lang}', 'ChangeLangController@index')->name('chang.lang');
-
 Route::get('/', function () {
     return view('auth.login');
 });
-Route::post('/login','AuthenticatedSessionController@store');
-Route::get('/logout','AuthenticatedSessionController@destroy')->name('logout');;
+Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 
-Route::get('/app', function () {
-    $role = Auth::user()->role;
-        session()->put('role',strtolower($role));
-        if($role->id = 3){
+Route::middleware(['auth:sanctum', 'verified','Blade'])->group(function () {
+
+    Route::get('/app', function () {
+        $role = Auth::user()->role;
+        session()->put('role', strtolower($role->name));
+
+        if ($role->id == 3) {
             return redirect()->back()->with(['errors_' => [__('msg.access_deny')]]);
-        }else{
-            Route::get('/app/dashboard', 'admin\DashboardController@index')->name('dashboard');
+        } else {
+            return redirect()->route('dashboard');
         }
+    });
+
+    Route::get('/app/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    Route::get('posts-index', [PostController::class, 'index'])->name('posts-index');
+    Route::get('posts-datatable', [PostController::class, 'datatable'])->name('post.datatable');
+    Route::post('save-post/{id?}', [PostController::class, 'save'])->name('post.save');
+    Route::get('post-edit/{id}', [PostController::class, 'edit'])->name('post.edit');
+    Route::get('block-post/{id}', [PostController::class, 'block'])->name('post.block');
+    Route::get('unblock-post/{id}', [PostController::class, 'unblock'])->name('post.unblock');
 });
 
-
-#Admin Panel
-Route::middleware(['auth:sanctum',config('jetstream.auth_session'),'verified','Blade'])->group(function () {
-
-    #Posts
-    Route::get('posts-index', 'PostController@index')->name('posts-index');
-    Route::get('posts-datatable', 'PostController@datatable')->name('post.datatable');
-    Route::post('save-post/{id?}', 'PostController@save')->name('post.save');
-    Route::get('post-edit/{id}', 'PostController@edit')->name('post.edit');
-    Route::get('block-post/{id}', 'PostController@block')->name('post.block');
-    Route::get('unblock-post/{id}', 'PostController@unblock')->name('post.unblock');
-});
+Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');

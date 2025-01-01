@@ -17,7 +17,7 @@ class Blade
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
     */
-    
+
     public function handle(Request $request, Closure $next, ...$guards)
     {
         $guards = empty($guards) ? [null] : $guards;
@@ -26,10 +26,10 @@ class Blade
             if (Auth::guard($guard)->check()) {
                 $user = Auth::user();
                 $permissions = json_decode($user->role->permissions);
-                
+
                 $whereNotIn = [1,2,3];
                 $whereIn = array_diff($permissions,$whereNotIn);
-                
+
                 $menus = Menu::whereNull('parent')
                 ->where(function ($q) use ($whereNotIn,$whereIn)
                 {
@@ -37,7 +37,7 @@ class Blade
                     ->whereNotIn('id',$whereNotIn);
                 })
                 ->with('childs')->get();
-                
+
                 view()->share('menus', $menus);
             }
         }
