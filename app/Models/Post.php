@@ -19,7 +19,7 @@ class Post extends Model
         'title',
         'description',
         'slug',
-        'thumbnail_path',
+        'media_id',
         'views',
         'status',
         'published_at',
@@ -49,5 +49,10 @@ class Post extends Model
     {
         $this->attributes['title'] = $value;
         $this->attributes['slug'] = Str::slug($value);
+    }
+
+    public function media()
+    {
+        return $this->belongsTo(Media::class);
     }
 }

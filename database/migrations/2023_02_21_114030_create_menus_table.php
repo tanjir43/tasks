@@ -49,7 +49,7 @@ return new class extends Migration
             'name'      => 'Posts',
             'web'       => 'posts-index',
             'app'       => '',
-            'web_icon'  => 'uil uil-user',
+            'web_icon'  => 'uil uil-newspaper',
             'app_icon'  => '',
             'note'      => '',
             'note_l'    => '',

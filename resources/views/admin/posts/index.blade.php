@@ -5,19 +5,20 @@
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 @endsection
 
-
+@php
+    use App\Enums\Category;
+@endphp
 @section('content')
     <div class="row">
         <div class="col-sm-12 col-md-8">
-            <x-card variant="primary" outline="true" title="{!! __('Group').' '.__('msg.list') !!}">
+            <x-card variant="primary" outline="true" title="{!! __('Post').' '.__('msg.list') !!}">
                 <x-slot name="body">
                     <div class="table-responsive">
-                        <table class="table table-bordered" id="group_table" style="width: 100%">
+                        <table class="table table-bordered" id="post_table" style="width: 100%">
                             <thead>
                                 <tr>
                                     <th class="text-center" style="width:25%">{{ __('msg.title') }}</th>
                                     <th class="text-center" style="width:30%">{{ __('Description') }}</th>
-                                    <th class="text-center" style="width:10%">{{ __('Total User') }}</th>
                                     <th class="text-center" style="width: 20%">{{ __('msg.action_by') }}</th>
                                     <th style="text-align: right;width: 20%">{{ __('msg.action') }}</th>
                                 </tr>
@@ -27,11 +28,11 @@
                 </x-slot>
             </x-card>
         </div>
-   
+
         <div class="col-sm-12 col-md-4">
-            <x-form route="group.save" :update="$record->id ?? null">
+            <x-form route="post.save" :update="$record->id ?? null">
                 <x-slot name="body">
-                    <x-card variant="primary"  title="{{__('Group').' '.__('msg.information')}}">
+                    <x-card variant="primary"  title="{{__('Post').' '.__('msg.information')}}">
                         <x-slot name="body">
                             <div class="form-group mt-3">
                                 <?php
@@ -44,6 +45,26 @@
                                 {!! Form::label('title',__('msg.title')) !!} <span class="text-danger">*</span>
                                 {!! Form::text('title',$record->title ?? old('title'),$attr) !!}
                             </div>
+
+                            <div class="form-group mt-3">
+                                {!! Form::label('category', __('Category')) !!} <span class="text-danger">*</span>
+                                {!! Form::select('category', $categories, $record->category_id ?? old('category'), [
+                                    'id' => 'category',
+                                    'class' => 'form-control mt-1',
+                                    'required' => 'required',
+                                ]) !!}
+                            </div>
+
+
+                            {{-- <div class="form-group mb-1 mt-3">
+                                {!! Form::label('file', __('msg.picture') ) !!} <br />
+                                @if(!empty($record->media))
+                                    <img src="{{ $record->media->attachment }}" class="img-thumbnail"  width="250px">
+                                @else
+                                    <input type="file" name="file">
+                                @endif
+                            </div> --}}
+
                             <div class="form-group mt-3">
                                 <?php
                                     $attr = [
@@ -55,6 +76,24 @@
                                {!! Form::textarea('description',$record->description ?? old('description'),$attr) !!}
 
                             </div>
+                            <div class="form-group mt-3">
+                                {!! Form::label('status', __('Status')) !!}
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        {!! Form::radio('status', 'draft', isset($record) && $record->status == 'draft', ['id' => 'status_draft', 'class' => 'form-check-input']) !!}
+                                        {!! Form::label('status_draft', __('Draft'), ['class' => 'form-check-label']) !!}
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        {!! Form::radio('status', 'published', isset($record) && $record->status == 'published', ['id' => 'status_published', 'class' => 'form-check-input']) !!}
+                                        {!! Form::label('status_published', __('Published'), ['class' => 'form-check-label']) !!}
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        {!! Form::radio('status', 'archived', isset($record) && $record->status == 'archived', ['id' => 'status_archived', 'class' => 'form-check-input']) !!}
+                                        {!! Form::label('status_archived', __('Archived'), ['class' => 'form-check-label']) !!}
+                                    </div>
+                                </div>
+                            </div>
+
                             <x-slot name="footer">
                                 {!! Form::submit(__('msg.save'),["class"=>"btn btn-success float-right"]) !!}
                             </x-slot>
@@ -86,18 +125,17 @@
 <script>
     $(function() {
         window.LaravelDataTables = window.LaravelDataTables || {};
-        window.LaravelDataTables["dataTableBuilder"] = $("#group_table").DataTable({
+        window.LaravelDataTables["dataTableBuilder"] = $("#post_table").DataTable({
             "serverSide": true,
             "processing": true,
             "ajax": {
-                "url": '{{ route('group.datatable') }}',
+                "url": '{{ route('post.datatable') }}',
                 "type": "GET"
             },
             "columns": [
                 { data: 'title', "orderable": true, "searchable": true },
                 { data: 'description', "orderable": false, "searchable": false },
-                { data: 'total_user', "orderable": false, "searchable": false },
-                { data: 'created_at', "orderable": false, "searchable": false }, 
+                { data: 'created_at', "orderable": false, "searchable": false },
                 { data: 'action', name: 'action', orderable: false, searchable: false },
             ]
         });

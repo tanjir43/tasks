@@ -17,10 +17,13 @@ return new class extends Migration
             $table->string('title', 255)->collation('utf8mb4_general_ci');
             $table->text('description')->nullable()->collation('utf8mb4_general_ci');
             $table->string('slug')->unique();
-            $table->string('thumbnail_path')->nullable();
             $table->unsignedInteger('views')->default(0);
             $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
             $table->timestamp('published_at')->nullable();
+            $table->foreignId('media_id')->nullable()->constrained('media');
+            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('updated_by')->nullable()->constrained('users');
+            $table->foreignId('deleted_by')->nullable()->constrained('users');
             $table->softDeletes();
             $table->timestamps();
         });

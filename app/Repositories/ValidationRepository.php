@@ -24,6 +24,9 @@ class ValidationRepository
         return Validator::make($request->all(), [
             'title'         => 'required|max:250',
             'description'   => 'nullable|max:250',
+            'category_id'   => 'required',
+            'status'        => ['required', Rule::in(['draft', 'published', 'archived'])],
+            'published_at'  => 'nullable|date',
         ]);
     }
 }

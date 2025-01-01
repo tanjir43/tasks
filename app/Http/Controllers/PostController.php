@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\user;
+namespace App\Http\Controllers;
 
+use App\Enums\Category;
 use App\Http\Controllers\Controller;
-use App\Models\post;
+use App\Models\Post;
 use App\Repositories\SaveRepository;
 use App\Repositories\ValidationRepository;
 use Illuminate\Http\Request;
@@ -21,17 +22,18 @@ class PostController extends Controller
 
     public function index()
     {
-        return view('admin.posts.index');
+        $categories = Category::getValues();
+        return view('admin.posts.index', compact('categories'));
     }
 
     public function save(Request $request, $id = null)
     {
         $this->vr->isValidPost($request,$id);
-        $status = $this->save->post($request,$id);
+        $status = $this->save->Post($request,$id);
 
         if ($status == 'success') {
             if (!empty($id)) {
-                return redirect(route('posts'))->with(['success' => 'successfully saved']);
+                return redirect(route('posts-index'))->with(['success' => 'successfully saved']);
             }
             return back()->with(['success' => 'successfully saved']);
         } else {
@@ -40,7 +42,7 @@ class PostController extends Controller
     }
     public function datatable()
     {
-        $info = post::with('userpost')->withTrashed()->orderBy('id', 'DESC');
+        $info = Post::withTrashed()->orderBy('id', 'DESC');
 
         return DataTables::of($info)
             ->addColumn('title', function ($data) {
@@ -48,9 +50,6 @@ class PostController extends Controller
             })
             ->addColumn('description', function ($data) {
                 return $data->description;
-            })
-            ->addColumn('total_user', function ($data) {
-                return $data->userpost->count();
             })
             ->addColumn('deleted_at', function ($data) {
                 if (empty($data->deleted_at)) {
@@ -84,16 +83,17 @@ class PostController extends Controller
 
     public function edit($id)
     {
-        $record = post::where('id', $id)->firstOrFail();
+        $categories = Category::getValues();
+        $record = Post::where('id', $id)->firstOrFail();
 
-        return view('admin.posts.index',compact('record'));
+        return view('admin.posts.index',compact('record','categories'));
     }
 
     public function block($id)
     {
         $status = $this->save->Blockpost($id);
         if ($status == 'success') {
-            return redirect(route('posts'))->with(['success' => 'successfully saved']);
+            return redirect(route('posts-index'))->with(['success' => 'successfully saved']);
         } else {
             return back()->with(['errors_' => $status]);
         }
@@ -103,7 +103,7 @@ class PostController extends Controller
     {
         $status = $this->save->Unblockpost($id);
         if ($status == 'success') {
-            return redirect(route('posts'))->with(['success' => 'successfully saved']);
+            return redirect(route('posts-index'))->with(['success' => 'successfully saved']);
         } else {
             return back()->with(['errors_' => $status]);
         }

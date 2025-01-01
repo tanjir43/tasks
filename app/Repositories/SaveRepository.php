@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class SaveRepository {
 
@@ -42,11 +43,27 @@ class SaveRepository {
 
     public function Post(Request $request,$id)
     {
+        $user_id = Auth::user()->id;
+
+        if ($request->hasFile('file')) {
+            $media_id = $this->UploadFile($request);
+        }
+
         if (!empty($id)) {
             $info = Post::find($id);
+
             if (!empty($info)){
-                $info->title            =   $request->title;
-                $info->description      =   $request->description;
+                $info->title            = $request->title;
+                $info->slug             = Str::slug($request->title, '-');
+                $info->category_id      = $request->category;
+                $info->description      = $request->description;
+                $info->status           = $request->status;
+                $info->updated_by       = $user_id;
+                $info->published_at     = now();
+
+                if ($request->hasFile('file')) {
+                    $info->media_id     = $media_id;
+                }
 
                 DB::beginTransaction();
                 try {
@@ -63,9 +80,19 @@ class SaveRepository {
             }
         }
         $data = [
-            'title'                 => $request->title,
-            'description'           => $request->description,
+            'title'         => $request->title,
+            'slug'          => Str::slug($request->title, '-'),
+            'category_id'   => $request->category,
+            'description'   => $request->description,
+            'status'        => $request->status,
+            'created_by'    => $user_id,
+            'published_at'  => now(),
         ];
+
+        if ($request->hasFile('file')) {
+            $data['media_id'] = $media_id;
+        }
+
         DB::beginTransaction();
         try {
             Post::create($data);
